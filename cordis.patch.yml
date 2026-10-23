@@ -1,0 +1,5 @@
+# DSHLink extension bundle patch: mount the client half that registers
+# the dshlink.* shortcut commands (model / effort / session navigation).
+- insert:
+    - id: ui-dshlink-extend
+      name: dsh-plugin-dshlink

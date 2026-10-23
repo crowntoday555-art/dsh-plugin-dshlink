@@ -1,0 +1,40 @@
+{
+  "name": "dsh-plugin-dshlink",
+  "version": "0.1.0",
+  "description": "Extended shortcuts for DeepSeek Harness: model switching, reasoning effort cycling, and session navigation. Companion of 大烧货LINK (DSHLink) watch remote.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ]
+    }
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "shortcuts",
+    "model-switching",
+    "reasoning-effort",
+    "session-hotkeys"
+  ],
+  "license": "MIT"
+}
