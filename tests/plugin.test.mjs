@@ -59,7 +59,7 @@ const ctx = {
 }
 target.apply(ctx)
 
-const expected = 4 + 2 + 9 // model 2 + effort 2 + session next/prev 2 + session 1-9
+const expected = 4 + 2 + 9 + 9 // model 2 + effort 2 + session next/prev 2 + session 1-9 + project 1-9
 if (registered.length !== expected) throw new Error(`FAIL: expected ${expected} commands, got ${registered.length}`)
 for (const cmd of registered) {
   const def = cmd.defaults['desktop:windows']
