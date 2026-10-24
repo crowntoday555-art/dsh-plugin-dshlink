@@ -141,20 +141,36 @@ const sessionsById = {
   s2: { id: 's2', retainedBy: {}, pinned: false, lastActivity: 300 },
   s3: { id: 's3', retainedBy: {}, pinned: false, lastActivity: 200, archived: true },
 }
+// 真实行为：store.current 与 groups 仅在 catalog.load() 之后才出现
+//（syncInputs 在 load 后同步 current），reasoningFor 带 defaultEffort。
+let dirLoaded = false
 const dir = {
-  load: async () => {},
+  load: async () => { dirLoaded = true },
   store: {
-    getSnapshot: () => ({
+    getSnapshot: () => dirLoaded ? ({
       current: { provider: 'official', model: 'deepseek-chat', reasoningEffort: 'medium' },
       groups: [
         { id: 'official', models: [{ id: 'deepseek-chat' }, { id: 'deepseek-reasoner' }] },
         { id: 'custom', models: [{ id: 'grok-4.5' }] },
       ],
-    }),
+    }) : { current: null, groups: [] },
   },
-  catalog: { reasoningFor: () => ({ efforts: [{ id: 'low' }, { id: 'medium' }, { id: 'high' }] }) },
+  catalog: { reasoningFor: (sel) => sel && sel.provider === 'official'
+    ? { efforts: [{ id: 'low' }, { id: 'medium' }, { id: 'high' }], defaultEffort: 'medium' }
+    : undefined },
   select: async (s) => { selections.push(s); return { ok: true } },
 }
+// 第二个目录：current 无显式 reasoningEffort，只有 defaultEffort（回退路径）
+let dir2Loaded = false
+const dir2 = {
+  load: async () => { dir2Loaded = true },
+  store: {
+    getSnapshot: () => dir2Loaded ? ({ current: { provider: 'official', model: 'deepseek-chat' } }) : { current: null },
+  },
+  catalog: { reasoningFor: () => ({ efforts: [{ id: 'low' }, { id: 'medium' }, { id: 'high' }], defaultEffort: 'medium' }) },
+  select: async (s) => { selections.push(s); return { ok: true } },
+}
+let useDir2 = false
 const ctx = {
   effect: (fn) => { fn(); return () => {} },
   get: (n) => (n === 'uiWorkspace' ? { openSession: (id) => {
@@ -164,7 +180,7 @@ const ctx = {
     sessionsById[id].retainedBy = { mainView: 1 }
   } } : undefined),
   sessions: { list: { getSnapshot: () => ({ byId: sessionsById }) } },
-  modelDirectories: { directoryFor: () => dir },
+  modelDirectories: { directoryFor: (sid) => (useDir2 && sid === 's2' ? dir2 : dir) },
   shortcuts: { register: realRegister },
 }
 target.apply(ctx)
@@ -219,6 +235,22 @@ const emptyCtx = { ...ctx, sessions: { list: { getSnapshot: () => ({ byId: {} })
 sessionsById.s1.retainedBy = {}
 r = byId['dshlink.model.next'].resolve({})
 assert(r.status === 'blocked', 'model.next blocked without an open session')
+sessionsById.s1.retainedBy = { mainView: 2 }
+
+// 回归：load 前 current 为 null —— 0.2.2 代码在此静默失败（selections 不增长）
+assert(dirLoaded, 'effort command must load the catalog first')
+assert(selections.length >= 3, 'effort selections recorded')
+
+// defaultEffort 回退：current.reasoningEffort 缺省时以 defaultEffort 定位（medium → up → high）
+useDir2 = true
+sessionsById.s1.retainedBy = {}
+sessionsById.s2.retainedBy = { mainView: 1 }
+r = byId['dshlink.effort.up'].resolve({})
+assert(r.status === 'handled', 'effort.up handled on defaultEffort session')
+await r.run()
+assert(selections[selections.length - 1]?.reasoningEffort === 'high', 'defaultEffort fallback: medium → high, got ' + JSON.stringify(selections[selections.length - 1]))
+useDir2 = false
+sessionsById.s2.retainedBy = {}
 sessionsById.s1.retainedBy = { mainView: 2 }
 
 console.log('ALL TESTS PASSED ✓  (commands:', registered.length + ')')

@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-dshlink",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Extended shortcuts for DeepSeek Harness: model switching, reasoning effort cycling, and session navigation. Companion of 大烧货LINK (DSHLink) watch remote.",
   "type": "module",
   "main": "lib/index.js",

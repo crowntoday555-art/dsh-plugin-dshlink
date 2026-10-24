@@ -2,6 +2,24 @@
 
 Extended shortcuts for **DeepSeek Harness** (desktop + web): model switching, reasoning-effort cycling, and session navigation. Companion plugin of [大烧货LINK / DSHLink](https://github.com/crowntoday555-art/dshlink) — a HarmonyOS watch remote for DSH.
 
+## 0.2.3 — 2026-10-24
+
+Fixed reasoning-effort cycling (Ctrl+Alt+U / Ctrl+Alt+J) silently doing nothing:
+
+- The directory's `current` selection and reasoning metadata (`efforts` /
+  `defaultEffort`) are only populated after `catalog.load()` completes. The
+  effort cycler read `current` before awaiting `load()` and bailed out. Load
+  first, then read — same order as the official model-selection UI and
+  dsh-shortcuts.
+- Current level now resolves `current.reasoningEffort ?? reasoning.defaultEffort`
+  (official semantics) instead of a synthetic "default" slot.
+- The mock harness now materializes `store.current`/`groups` only after
+  `load()` (regression test), plus a `defaultEffort` fallback case; a new
+  `tests/rc3-directory.test.mjs` runs the plugin against the REAL rc.3
+  `ModelDirectoryResolver`/`ModelDirectory` classes extracted from the DSH
+  app bundle (stubbed cordis/remote) — effort up/down and model next all
+  drive `selectModel` end to end.
+
 ## 0.2.2 — 2026-10-24
 
 Fixed a startup crash against DSH 0.2.1-rc.3 ("web boot: entry did not activate /
