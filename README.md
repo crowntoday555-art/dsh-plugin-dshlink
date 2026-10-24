@@ -2,6 +2,23 @@
 
 Extended shortcuts for **DeepSeek Harness** (desktop + web): model switching, reasoning-effort cycling, and session navigation. Companion plugin of [大烧货LINK / DSHLink](https://github.com/crowntoday555-art/dshlink) — a HarmonyOS watch remote for DSH.
 
+## 0.2.2 — 2026-10-24
+
+Fixed a startup crash against DSH 0.2.1-rc.3 ("web boot: entry did not activate /
+dsh-plugin-dshlink: failed"):
+
+- Shortcut modifiers now use `"primary"` instead of hardcoded `"control"`.
+  On `web:macos` a `control+alt` default is rejected by `isWebBindingAllowed`
+  (macOS web requires `meta`/primary), which made `ctx.shortcuts.register()`
+  throw during activation and abort the whole web boot.
+- Dropped `desktop:linux`/`web:linux` default profiles: the Linux rule set
+  reserves Arrow-key defaults ("Reserved shortcut default").
+- `regions` now includes `"terminal"` so watch-driven commands also fire while
+  a terminal pane has focus.
+- The mock test harness now ports the real registry validation
+  (normalizeBinding / isWebBindingAllowed / bindingIssue / built-in conflict
+  table) so regressions of this class fail in `node tests/plugin.test.mjs`.
+
 ## Shortcuts (Windows/Linux; macOS swaps Ctrl for ⌘)
 
 | Action | Default keys |
