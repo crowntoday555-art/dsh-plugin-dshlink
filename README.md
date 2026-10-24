@@ -2,6 +2,18 @@
 
 Extended shortcuts for **DeepSeek Harness** (desktop + web): model switching, reasoning-effort cycling, and session navigation. Companion plugin of [大烧货LINK / DSHLink](https://github.com/crowntoday555-art/dshlink) — a HarmonyOS watch remote for DSH.
 
+## 0.2.4 — 2026-10-24
+
+- Mount durability: install must add the loader insert to the GLOBAL
+  `~/.dsh/cordis.patch.yml` — DSH 0.2.1-rc.3 rewrites profile-layer files
+  (`profiles/*/package.json` bundles + `cordis.patch.yml`), silently dropping
+  third-party mounts; the global layer survives (same mechanism as
+  dsh-web-search-pro). Without it every DSH settings change unloads the
+  plugin and all 24 commands stop working.
+- Diagnostics: `window.__dshlinkRegistered` marker after registration and
+  console logs on effort/model command paths (failures are no longer
+  silent).
+
 ## 0.2.3 — 2026-10-24
 
 Fixed reasoning-effort cycling (Ctrl+Alt+U / Ctrl+Alt+J) silently doing nothing:
